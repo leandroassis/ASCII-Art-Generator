@@ -13,18 +13,29 @@
 #define OK                  0
 #define NUMERO_ARGUMENTOS   5
 #define EOS                 '\0'
+#define TAMANHOARQUIVO      256
+#define CARACTERES          "$@B8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'. "
 
 // Definicao de Erros
 #define ARGUMENTO_INVALIDO      0
 #define ERRO_ABRINDO_ARQUIVO    1
+#define NOME_INVALIDO           2
+#define ARQUIVOPPM_CORROMPIDO   3
 
+// Definicao dos Comandos do sys
+#define COPY    " arquivocopia"
+#define TEMP    " arquivotmp.ppm"
+#define REMOVE  "rm arquivocopia arquivotmp.ppm"
 
 int main(int argc, char *argv[])
 {
     FILE *imagemOriginal, *imagemSaida;
-    unsigned alturaSaida, larguraSaida, argumento;
-    unsigned short indiceArgumento;
-    char *verificacao, *cp = "cp ", *convert = "convert ";
+    unsigned alturaSaida, larguraSaida, argumento, alturaOriginal, larguraOriginal, valorMaximoEscala;
+    unsigned indiceLinhas, indiceColunas;
+    unsigned short indiceArgumento, intensidadeCinza;
+    unsigned char intensidadeVermelho, intensidadeVerde, intensidadeAzul;
+    char *verificacao, CP[275] = "cp ", CONVERT[280] = "convert", identificador[3];
+    float indiceDivisao;
     
     if(argc != NUMERO_ARGUMENTOS)
     {
@@ -32,8 +43,15 @@ int main(int argc, char *argv[])
         printf("Uso: %s <caminho imagem original> <nome imagem saida> <largura da imagem saida> <altura da imagem de saida>.\n", argv[0]);
         exit(ARGUMENTO_INVALIDO);
     }
+    
+    if((strlen(argv[1]) > TAMANHOARQUIVO) || (strlen(argv[2]) > TAMANHOARQUIVO))
+    {
+        printf("Nome de um dos arquivos excede o limite.\n");
+        printf("Tente trazer os arquivos para um diretorio mais proximo.\n");
+        exit(NOME_INVALIDO);
+    }
 
-    for(indiceArgumento = 3; indiceArgumento <= 4; indiceArgumento++)
+    for(indiceArgumento = 3; indiceArgumento < 5; indiceArgumento++)
     {
         argumento = (unsigned) strtoul(argv[indiceArgumento], &verificacao, 10);
         if(*verificacao != EOS)
@@ -45,20 +63,41 @@ int main(int argc, char *argv[])
         else if(indiceArgumento == 4) alturaSaida = argumento;
     }
 
-    system("convert gaia.jpeg saida.ppm");
-    /*
-    system(strcat(strcat(cp, argv[1]), " copia.jpeg"));
-    system(strcat(strcat(convert, argv[1]), " imagemOriginal.ppm"));
-    */
-    //system("convert %s imagemOriginal.ppm", argv[1]);
+    system(strcat(strcat(CP, argv[1]), COPY)); //copia a imagem original em um arquivo que será descartado dps
+    system(strcat(strcat(CONVERT, COPY), TEMP)); //converte a imagem original em um arquivo ppm
 
-    imagemOriginal = fopen(argv[1], "r");
+    imagemOriginal = fopen("arquivotmp.ppm", "r");
     imagemSaida = fopen(argv[2], "w");
     if((!imagemOriginal) || (!imagemSaida))
     {
         printf("Erro abrindo os arquivos.\n");
         exit(ERRO_ABRINDO_ARQUIVO);
     }
+
+    fscanf(imagemOriginal, "%s", identificador);
+    if(strcmp(identificador,"P6") != 0)
+    {
+        printf("O arquivo ppm esta corrompido.\n");
+        exit(ARQUIVOPPM_CORROMPIDO);
+    }
     
+    fscanf(imagemOriginal, "%u %u %u", &larguraOriginal, &alturaOriginal, &valorMaximoEscala);
+    indiceDivisao = valorMaximoEscala/strlen(CARACTERES);
+
+    printf("Convertendo...\n");
+    for(indiceLinhas = 0; indiceLinhas < alturaOriginal; indiceLinhas++)
+    {
+        for(indiceColunas = 0; indiceColunas < larguraOriginal; indiceColunas++)
+        {
+            fscanf(imagemOriginal, "%c%c%c", &intensidadeVermelho, &intensidadeVerde, &intensidadeAzul);
+            intensidadeCinza = (unsigned short) (0.3*intensidadeVermelho + 0.59*intensidadeVerde + 0.11*intensidadeAzul);
+            fprintf(imagemSaida, "%c", CARACTERES[(int)(intensidadeCinza/indiceDivisao)]);
+        }
+        fprintf(imagemSaida, "\n");
+    }
+    printf("Convertido com sucesso.\n");
+    system(REMOVE); //limpa os arquivos temporarios
+    fclose(imagemOriginal);
+    fclose(imagemSaida);
     return OK;
 }
