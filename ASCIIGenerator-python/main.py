@@ -6,19 +6,18 @@ larguraCaracter = 10
 alturaCaracter = 18
 
 fotoOriginal = input("Insira o nome da foto a ser convertida: ")
-arquivoConvertido = input("Insira o nome do arquivo de destino: ")
 dimensoesDestino = input("Insira as dimensoes da figura de destino:\nex: 200(largura), 100(altura) ").split(", ")
 
 try:
     imagem = Image.open(fotoOriginal)
-    arquivoSaida = open(arquivoConvertido, "w")
+    arquivoSaida = open("foto.txt", "w")
 except:
     print("Verifique os arquivos de entrada.")
     exit(FileNotFoundError)
 
 larguraOriginal, alturaOriginal = imagem.size
 if len(dimensoesDestino) != 2:
-    print("Valores de dimensoes invalidas inseridos.\nUso: <largura (int), altura (int)>")
+    print("Usando as dimensoes originais da imagem.")
     alturaDestino = alturaOriginal
     larguraDestino = larguraOriginal
 else:
@@ -37,7 +36,7 @@ else:
         print(f"Será feita a conversão para {larguraDestino}x{dimensoesDestino[1]}.\n")
     imagem = imagem.resize((larguraDestino, alturaDestino), Image.BICUBIC)
 
-print("Convertando...")
+print("Convertendo...")
 pixels = imagem.load()
 imagemSaida = Image.new(mode="RGB", size=(larguraDestino*larguraCaracter, alturaDestino*alturaCaracter), color=(0,0,0))
 imagemDesenho = ImageDraw.Draw(imagemSaida)
@@ -49,7 +48,8 @@ for i in range(alturaDestino):
         pixels[j, i] = (gray, gray, gray)
         arquivoSaida.write(caracteres[int(gray/indiceDivisao)])
         imagemDesenho.text((j*larguraCaracter, i*alturaCaracter),caracteres[int(gray/indiceDivisao)])
+        #imagemDesenho.text((j*larguraCaracter, i*alturaCaracter),caracteres[int(gray/indiceDivisao)], fill=(intensidadeVermelho, intensidadeVerde, intensidadeAzul))
     arquivoSaida.write("\n")    
 
-imagemSaida.save("saida.png")
+imagemSaida.save("foto.png")
 print("Convertido com sucesso")
