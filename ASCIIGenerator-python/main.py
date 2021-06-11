@@ -1,3 +1,10 @@
+'''
+Conversor de Imagens em ASCII Art
+
+Author: Leandro Assis dos Santos
+Date: 11 jun 2021
+'''
+
 from PIL import Image, ImageDraw, ImageFont
 
 caracteres = list("$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'. ")
@@ -49,6 +56,7 @@ for i in range(alturaDestino):
         arquivoSaida.write(caracteres[int(gray/indiceDivisao)])
         imagemDesenho.text((j*larguraCaracter, i*alturaCaracter),caracteres[int(gray/indiceDivisao)])
         #imagemDesenho.text((j*larguraCaracter, i*alturaCaracter),caracteres[int(gray/indiceDivisao)], fill=(intensidadeVermelho, intensidadeVerde, intensidadeAzul))
+        #Imagem de saida com caracteres coloridos
     arquivoSaida.write("\n")    
 
 imagemSaida.save("foto.png")
