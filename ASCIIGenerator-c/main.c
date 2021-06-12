@@ -14,7 +14,7 @@
 #define NUMERO_ARGUMENTOS   5
 #define EOS                 '\0'
 #define TAMANHOARQUIVO      256
-#define CARACTERES          "$@B8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'. "
+#define CARACTERES          "$@B8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+<>i!I;:,\"^'. "
 
 // Definicao de Erros
 #define ARGUMENTO_INVALIDO      0
@@ -95,6 +95,7 @@ int main(int argc, char *argv[])
         }
         fprintf(imagemSaida, "\n");
     }
+
     printf("Convertido com sucesso.\n");
     system(REMOVE); //limpa os arquivos temporarios
     fclose(imagemOriginal);
