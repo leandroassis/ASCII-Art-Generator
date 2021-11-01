@@ -1,5 +1,5 @@
 /*
-    Conversor de imagens em ASCII Art
+    Image to ASCII Art Converter
 
     Author: Leandro Assis dos Santos
     Date: 11 jun 2021
@@ -9,20 +9,20 @@
 #include <stdlib.h>
 #include <string.h>
 
-// Definicao de Diretivas
+// Definements
 #define OK                  0
 #define NUMERO_ARGUMENTOS   5
 #define EOS                 '\0'
 #define TAMANHOARQUIVO      256
 #define CARACTERES          "$@B8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+<>i!I;:,\"^'. "
 
-// Definicao de Erros
+// Errors definements
 #define ARGUMENTO_INVALIDO      0
 #define ERRO_ABRINDO_ARQUIVO    1
 #define NOME_INVALIDO           2
 #define ARQUIVOPPM_CORROMPIDO   3
 
-// Definicao dos Comandos do sys
+// Sys commands auxiliary
 #define COPY    " arquivocopia"
 #define TEMP    " arquivotmp.ppm"
 #define REMOVE  "rm arquivocopia arquivotmp.ppm"
@@ -63,9 +63,9 @@ int main(int argc, char *argv[])
         else if(indiceArgumento == 4) alturaSaida = argumento;
     }
 
-    system(strcat(strcat(CP, argv[1]), COPY)); //copia a imagem original em um arquivo que será descartado dps
-    system(strcat(strcat(CONVERT, COPY), TEMP)); //converte a imagem original em um arquivo ppm
-
+    system(strcat(strcat(CP, argv[1]), COPY)); // Copy the image in an temporary file
+    system(strcat(strcat(CONVERT, COPY), TEMP)); // Convert the image in an .ppm file
+    
     imagemOriginal = fopen("arquivotmp.ppm", "r");
     imagemSaida = fopen(argv[2], "w");
     if((!imagemOriginal) || (!imagemSaida))
@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
     }
 
     printf("Convertido com sucesso.\n");
-    system(REMOVE); //limpa os arquivos temporarios
+    system(REMOVE); // Clean the temporary files
     fclose(imagemOriginal);
     fclose(imagemSaida);
     return OK;
