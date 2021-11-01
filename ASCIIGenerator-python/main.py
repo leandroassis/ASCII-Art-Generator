@@ -1,5 +1,5 @@
 '''
-Conversor de Imagens em ASCII Art
+Image to ASCII Art Converter
 
 Author: Leandro Assis dos Santos
 Date: 11 jun 2021
