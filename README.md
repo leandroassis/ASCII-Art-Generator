@@ -15,10 +15,18 @@ Note: This project isn't optimezed, so the scripts (principally the python one) 
     Only uses the PIL library.
 
 - C:
-    ImageMagick is required.
+    ImageMagick is required (https://github.com/imagemagick/imagemagick).
+    Image format libraries as libjpg, libjpeg and libpng.
 
 # Usage:
 
 To use the python application you just have to run "python3 main.py" and answer the questions with your desired image informations.
 To use the C application you first have to compile it, and than run:
+'''
     "[.exe output file] [path to image] [path to output file] [image lenght] [image height]"
+'''
+
+# Futures updates
+
+1. Change all the C implementation to use more ImageMagick resources
+2. Make the application more robust and errors safe.

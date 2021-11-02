@@ -8,12 +8,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ImageMagick-7/MagickWand/MagickWand.h>
 
 // Definements
 #define OK                  0
-#define NUMERO_ARGUMENTOS   5
+#define NUMERO_ARGUMENTOS   3
 #define EOS                 '\0'
-#define TAMANHOARQUIVO      256
 #define CARACTERES          "$@B8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+<>i!I;:,\"^'. "
 
 // Errors definements
@@ -22,50 +22,43 @@
 #define NOME_INVALIDO           2
 #define ARQUIVOPPM_CORROMPIDO   3
 
-// Sys commands auxiliary
-#define COPY    " arquivocopia"
-#define TEMP    " arquivotmp.ppm"
-#define REMOVE  "rm arquivocopia arquivotmp.ppm"
-
 int main(int argc, char *argv[])
 {
     FILE *imagemOriginal, *imagemSaida;
-    unsigned alturaSaida, larguraSaida, argumento, alturaOriginal, larguraOriginal, valorMaximoEscala;
-    unsigned indiceLinhas, indiceColunas;
-    unsigned short indiceArgumento, intensidadeCinza;
+    unsigned int alturaOriginal, larguraOriginal, valorMaximoEscala;
+    uint32_t indiceLinhas, indiceColunas;
+    uint16_t indiceArgumento, intensidadeCinza;
+    MagickWand *mw = NULL;
     unsigned char intensidadeVermelho, intensidadeVerde, intensidadeAzul;
-    char *verificacao, CP[275] = "cp ", CONVERT[280] = "convert", identificador[3];
+    char *verificacao, identificador[3];
     float indiceDivisao;
     
     if(argc != NUMERO_ARGUMENTOS)
     {
         printf("Uso incorreto.\n");
-        printf("Uso: %s <caminho imagem original> <nome imagem saida> <largura da imagem saida> <altura da imagem de saida>.\n", argv[0]);
+        printf("Uso: %s <caminho imagem original> <nome imagem saida>.\n", argv[0]);
         exit(ARGUMENTO_INVALIDO);
     }
+
+    MagickWandGenesis();
+    mw = NewMagickWand();
     
-    if((strlen(argv[1]) > TAMANHOARQUIVO) || (strlen(argv[2]) > TAMANHOARQUIVO))
-    {
-        printf("Nome de um dos arquivos excede o limite.\n");
-        printf("Tente trazer os arquivos para um diretorio mais proximo.\n");
-        exit(NOME_INVALIDO);
+    MagickReadImage(mw, argv[1]); // Read the source image
+
+    alturaOriginal = MagickGetImageHeight(mw);
+    larguraOriginal = MagickGetImageWidth(mw);
+
+    printf("%d %d\n", alturaOriginal, larguraOriginal);
+    if(larguraOriginal > 1024){
+        printf("Reconfigurado tamanho.\n");
+        alturaOriginal = (1024*alturaOriginal)/larguraOriginal;
+        larguraOriginal = 1024;
+        MagickResizeImage(mw,larguraOriginal,alturaOriginal,LanczosFilter);
+        MagickSetImageCompressionQuality(mw,95);
     }
 
-    for(indiceArgumento = 3; indiceArgumento < 5; indiceArgumento++)
-    {
-        argumento = (unsigned) strtoul(argv[indiceArgumento], &verificacao, 10);
-        if(*verificacao != EOS)
-        {
-            printf("Argumento %c invalido na posicao %u.\n", *verificacao, indiceArgumento);
-            exit(ARGUMENTO_INVALIDO);
-        }
-        if(indiceArgumento == 3) larguraSaida = argumento;
-        else if(indiceArgumento == 4) alturaSaida = argumento;
-    }
+    MagickWriteImage(mw, "arquivotmp.ppm");
 
-    system(strcat(strcat(CP, argv[1]), COPY)); // Copy the image in an temporary file
-    system(strcat(strcat(CONVERT, COPY), TEMP)); // Convert the image in an .ppm file
-    
     imagemOriginal = fopen("arquivotmp.ppm", "r");
     imagemSaida = fopen(argv[2], "w");
     if((!imagemOriginal) || (!imagemSaida))
@@ -75,7 +68,7 @@ int main(int argc, char *argv[])
     }
 
     fscanf(imagemOriginal, "%s", identificador);
-    if(strcmp(identificador,"P6") != 0)
+    if(strcmp(identificador,"P6"))
     {
         printf("O arquivo ppm esta corrompido.\n");
         exit(ARQUIVOPPM_CORROMPIDO);
@@ -95,10 +88,13 @@ int main(int argc, char *argv[])
         }
         fprintf(imagemSaida, "\n");
     }
-
+    
     printf("Convertido com sucesso.\n");
-    system(REMOVE); // Clean the temporary files
+//    MagickWriteImage(mw, argv[1]);
+    if(mw) mw = DestroyMagickWand(mw);
     fclose(imagemOriginal);
     fclose(imagemSaida);
+    MagickWandTerminus();
+    system("rm -rf arquivotmp.ppm");
     return OK;
 }
