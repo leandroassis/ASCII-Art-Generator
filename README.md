@@ -1,7 +1,7 @@
 # ASCII Art Generator
 ### Author: Leandro Assis
 ### Date: 11 jun 2021
-#### Note: Ins't complete yet. That are some changes and improvements to be done in c code.
+#### Note: Isn't complete yet. There are some changes and improvements to be done in c code.
 
 # Introduction
 
